@@ -35,8 +35,32 @@ def main(page: ft.Page):
     # ListView per mostrare la lista di auto aggiornata
     lista_auto = ft.ListView(expand=True, spacing=5, padding=10, auto_scroll=True)
 
+    def handleAdd(e):
+        #questa funzione per il tasto + ed incrementare i valori
+        currentVal = int(numero_passeggeri.value)
+        numero_passeggeri.value = currentVal + 1
+        numero_passeggeri.update()
+
+    def handleRemove(e):
+        #questa funzione per il tasto meno e diminuire il valore del numero di posti
+        currentVal = int(numero_passeggeri.value)
+        #metto un controllo sul valore del numero di passeggeri che non può essere un un numero negativo
+        if currentVal > 0:
+            numero_passeggeri.value = currentVal - 1
+            numero_passeggeri.update()
+
     # Tutti i TextField per le info necessarie per aggiungere una nuova automobile (marca, modello, anno, contatore posti)
-    # TODO
+    auto_marca = ft.TextField(value= "Marca")
+    auto_modello = ft.TextField(value= "Modello")
+    autoAnno = ft.TextField(value= "Anno")
+    btnMinus = ft.IconButton (icon = ft.Icons.REMOVE,
+                              icon_color="red",
+                              icon_size= 16, on_click=handleRemove)
+    btnAdd = ft.IconButton (icon = ft.Icons.ADD,
+                            icon_color="green",
+                            icon_size= 16, on_click=handleAdd)
+    numero_passeggeri = ft.TextField(width=100, disabled=True, value = "0", border_color= "green", text_align = ft.TextAlign.CENTER)
+
 
     # --- FUNZIONI APP ---
     def aggiorna_lista_auto():
@@ -58,14 +82,38 @@ def main(page: ft.Page):
         page.update()
 
     # Handlers per la gestione dei bottoni utili all'inserimento di una nuova auto
-    # TODO
+    def aggiungi_automobile(e):
+        #qua gestisci le eccezioni
+        try:
+            """uso una variabile locale "anno" invece di "autoAnno" perché autoAnno è il TextField:
+                se lo sovrascrivessi con un numero (int), al prossimo click il programma andrebbe in errore
+                dato che non sarebbe più un campo di testo ma un intero. 
+                In laboratorio non capivamo perchè scrivendo autoAnno = int(autoAnno.value) non funzionasse"""
+            anno = int(autoAnno.value)
+            numero_posti = int(numero_passeggeri.value)
+            #auto_marca e modello sono due elementi flet quindi di questi devo passare solo il value alla funzione autonoleggio
+            autonoleggio.aggiungi_automobile(auto_marca.value, auto_modello.value, anno, numero_posti)
+            aggiorna_lista_auto()
+            auto_marca.value=""
+            auto_modello.value=""
+            autoAnno.value=""
+            numero_passeggeri.value = "0"
+
+
+            #aggiorno la pagina (potrei aggiornare anche i singoli elementi presi uno per volta, per visualizzarli "vuoti"
+            page.update()
+
+        except Exception:
+            alert.show_alert("ERRORE:inserisci valori numeri per anno e posti")
+
+
 
     # --- EVENTI ---
     toggle_cambia_tema = ft.Switch(label="Tema scuro", value=True, on_change=cambia_tema)
     pulsante_conferma_responsabile = ft.ElevatedButton("Conferma", on_click=conferma_responsabile)
 
     # Bottoni per la gestione dell'inserimento di una nuova auto
-    # TODO
+    bottone_aggiungi_automobile = ft.ElevatedButton("Aggiungi Automobile", on_click=aggiungi_automobile)
 
     # --- LAYOUT ---
     page.add(
@@ -83,7 +131,13 @@ def main(page: ft.Page):
                alignment=ft.MainAxisAlignment.CENTER),
 
         # Sezione 3
-        # TODO
+        ft.Text("Aggiungi nuova automobile", size = 20),
+        ft.Row(spacing=20,
+               controls=[auto_marca, auto_modello, autoAnno, btnMinus, numero_passeggeri, btnAdd],
+               alignment=ft.MainAxisAlignment.CENTER),
+        ft.Row(spacing=20,
+               controls=[bottone_aggiungi_automobile],
+               alignment=ft.MainAxisAlignment.CENTER),
 
         # Sezione 4
         ft.Divider(),
