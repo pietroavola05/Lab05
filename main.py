@@ -8,6 +8,7 @@ def main(page: ft.Page):
     page.title = "Lab05"
     page.horizontal_alignment = "center"
     page.theme_mode = ft.ThemeMode.DARK
+    anno_corrente = 2025  #imposto l'anno corrente in  modo da poter fare un controllo sull'anno inserito dall'utente
 
     # --- ALERT ---
     alert = AlertManager(page)
@@ -53,13 +54,18 @@ def main(page: ft.Page):
     auto_marca = ft.TextField(value= "Marca")
     auto_modello = ft.TextField(value= "Modello")
     autoAnno = ft.TextField(value= "Anno")
-    btnMinus = ft.IconButton (icon = ft.Icons.REMOVE,
-                              icon_color="red",
-                              icon_size= 16, on_click=handleRemove)
-    btnAdd = ft.IconButton (icon = ft.Icons.ADD,
+    #provo ad usare le icons come spiegato dal prof a lezione (meno e più con un pulsante rotondo)
+    #link al browser #https://gallery.flet.dev/icons-browser/
+    btnMinus = ft.IconButton(icon=ft.Icons.REMOVE_CIRCLE_ROUNDED,
+                             icon_size=20, icon_color="red",
+                             on_click=handleRemove)
+
+    btnAdd = ft.IconButton (icon = ft.Icons.ADD_CIRCLE_ROUNDED,
                             icon_color="green",
-                            icon_size= 16, on_click=handleAdd)
-    numero_passeggeri = ft.TextField(width=100, disabled=True, value = "0", border_color= "green", text_align = ft.TextAlign.CENTER)
+                            icon_size= 20, on_click=handleAdd)
+    #imposto passeggeri = 1 poichè ragionevolmente devo avere almeno un posto all'interno di un auto
+    #(posso comunque portarlo a zero con il pulsante - , basta che non sia mai negativo per il controllo nella def handleremove)
+    numero_passeggeri = ft.TextField(width=100, disabled=True, value = "1", border_color= "green", text_align = ft.TextAlign.CENTER)
 
 
     # --- FUNZIONI APP ---
@@ -90,14 +96,20 @@ def main(page: ft.Page):
                 dato che non sarebbe più un campo di testo ma un intero. 
                 In laboratorio non capivamo perchè scrivendo autoAnno = int(autoAnno.value) non funzionasse"""
             anno = int(autoAnno.value)
-            numero_posti = int(numero_passeggeri.value)
-            #auto_marca e modello sono due elementi flet quindi di questi devo passare solo il value alla funzione autonoleggio
-            autonoleggio.aggiungi_automobile(auto_marca.value, auto_modello.value, anno, numero_posti)
-            aggiorna_lista_auto()
-            auto_marca.value=""
-            auto_modello.value=""
-            autoAnno.value=""
-            numero_passeggeri.value = "0"
+            if anno > anno_corrente or anno < 0:
+                #ragionevolmente posso supporre che le macchine dell'autonoleggio non risalgano ad anni maggiori
+                # dell'anno corrente o che siano negativi
+                return alert.show_alert("Inserisci un anno valido")
+            else:
+                numero_posti = int(numero_passeggeri.value)
+                #auto_marca e modello sono due elementi flet quindi di questi devo passare solo il value alla funzione autonoleggio
+                autonoleggio.aggiungi_automobile(auto_marca.value, auto_modello.value, anno, numero_posti)
+                aggiorna_lista_auto()
+                #resetto i valori
+                auto_marca.value=""
+                auto_modello.value=""
+                autoAnno.value=""
+                numero_passeggeri.value = "0"
 
 
             #aggiorno la pagina (potrei aggiornare anche i singoli elementi presi uno per volta, per visualizzarli "vuoti"
@@ -132,6 +144,7 @@ def main(page: ft.Page):
 
         # Sezione 3
         ft.Text("Aggiungi nuova automobile", size = 20),
+        #creo le due righe per aggiungere i dati di un auto e una per il pulsante "aggiungi auto"
         ft.Row(spacing=20,
                controls=[auto_marca, auto_modello, autoAnno, btnMinus, numero_passeggeri, btnAdd],
                alignment=ft.MainAxisAlignment.CENTER),
